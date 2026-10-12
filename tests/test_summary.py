@@ -1,7 +1,14 @@
 import os
 from collections import defaultdict
 
-from dirsummary.summary import classify, collect, format_size, summarize
+from dirsummary.summary import (
+    classify,
+    collect,
+    format_size,
+    human_lines,
+    human_table,
+    summarize,
+)
 
 
 def sizes_by_type(entries):
@@ -103,4 +110,22 @@ def test_summarize_tie_break_name_ascending():
     entries = [(".z", 10), (".a", 10)]
     s = summarize(entries)
     assert [t.type for t in s.by_type] == [".a", ".z"]
+
+
+def test_human_lines_rendering():
+    s = summarize([(".md", 4194), (".py", 12576), (".py", 0)])
+    lines = human_lines(s, "/home/x")
+    assert lines[-1] == "3 files, 16.4 KB total"  # 4194 + 12576 + 0
+    data_rows = [ln for ln in lines if "files," not in ln]
+    assert data_rows[0].split()[1] == ".py"          # largest-bytes-first
+
+
+def test_human_lines_empty_total_only():
+    s = summarize([])
+    assert human_lines(s, "/x") == ["0 files, 0 B total"]
+
+
+def test_human_table_is_join_of_lines():
+    s = summarize([(".txt", 10)])
+    assert human_table(s, "/x") == "\n".join(human_lines(s, "/x"))
 

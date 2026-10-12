@@ -102,3 +102,23 @@ def summarize(entries):
     total_bytes = sum(total for _, total in aggregated.values())
     return Summary(len(entries), total_bytes, by_type)
 
+
+def human_lines(summary, path_label):
+    """Return a list of pre-formatted output lines for the human view.
+
+    `path_label` is kept in the signature for future use (e.g. a header line);
+    the current output is just per-type rows, a separator, and a totals line.
+    """
+    lines = []
+    for stat in summary.by_type:
+        lines.append(f"{stat.count:>4}  {stat.type:<16} {format_size(stat.total_bytes):>10}")
+    if summary.by_type:
+        lines.append("-" * 34)
+    lines.append(f"{summary.total_files} files, {format_size(summary.total_bytes)} total")
+    return lines
+
+
+def human_table(summary, path_label):
+    """Return `human_lines` joined for printing."""
+    return "\n".join(human_lines(summary, path_label))
+
