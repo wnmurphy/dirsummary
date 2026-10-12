@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dirsummary"
+version = "0.1.0"
+description = "Summarise a directory's files by type (extension) and size."
+requires-python = ">=3.7"
+dependencies = []
+
+[project.scripts]
+dirsummary = "dirsummary.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
