@@ -5,6 +5,18 @@ reports the file count and total size, and a grand total across the whole tree.
 
 Standard library only. No dependencies. Python 3.7+.
 
+## Notes
+
+This repo was an experiment in using an open source, local model + superpowers to see if I could create a piece of software entirely declaratively.
+
+I can't really say that I wrote it, because it was written entirely with:
+
+* Qwen Code (0.25.1)
+* Ollama (0.40.3)
+* Qwen3.8:27B-mlx
+* superpowers (7)
+* minimal input/guidance/direction from me
+
 ## Usage
 
 ```bash
