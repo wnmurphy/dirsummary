@@ -1,7 +1,7 @@
 import os
 from collections import defaultdict
 
-from dirsummary.summary import classify, collect, format_size
+from dirsummary.summary import classify, collect, format_size, summarize
 
 
 def sizes_by_type(entries):
@@ -79,4 +79,28 @@ def test_collect_broken_symlink_does_not_crash(tmp_path):
     (tmp_path / "broken").symlink_to(str(tmp_path / "does-not-exist"))
     entries = collect(str(tmp_path))     # must not raise
     assert any(k == "(symlink)" for k, _ in entries)
+
+
+def test_summarize_empty():
+    s = summarize([])
+    assert s.total_files == 0
+    assert s.total_bytes == 0
+    assert s.by_type == []
+
+
+def test_summarize_groups_and_sorts_desc_by_bytes():
+    entries = [(".py", 100), (".py", 50), (".txt", 300)]
+    s = summarize(entries)
+    assert s.total_files == 3
+    assert s.total_bytes == 450
+    assert [(t.type, t.count, t.total_bytes) for t in s.by_type] == [
+        (".txt", 1, 300),
+        (".py", 2, 150),
+    ]
+
+
+def test_summarize_tie_break_name_ascending():
+    entries = [(".z", 10), (".a", 10)]
+    s = summarize(entries)
+    assert [t.type for t in s.by_type] == [".a", ".z"]
 

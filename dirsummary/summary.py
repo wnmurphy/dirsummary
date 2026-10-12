@@ -1,6 +1,7 @@
 # pure, side-effect-free logic for dirsummary
 
 import os
+from dataclasses import dataclass
 
 _UNITS = ["KB", "MB", "GB", "TB", "PB", "EB", "ZB"]
 
@@ -72,4 +73,32 @@ def collect(path):
                 if size is not None:
                     entries.append((classify(name), size))
     return entries
+
+
+@dataclass
+class TypeStat:
+    type: str
+    count: int
+    total_bytes: int
+
+
+@dataclass
+class Summary:
+    total_files: int
+    total_bytes: int
+    by_type: list
+
+
+def summarize(entries):
+    """Collapse (type_key, size) entries into a sorted per-type summary."""
+    aggregated = {}
+    for key, size in entries:
+        count, total = aggregated.get(key, (0, 0))
+        aggregated[key] = (count + 1, total + size)
+    by_type = [
+        TypeStat(key, count, total) for key, (count, total) in aggregated.items()
+    ]
+    by_type.sort(key=lambda stat: (-stat.total_bytes, stat.type))
+    total_bytes = sum(total for _, total in aggregated.values())
+    return Summary(len(entries), total_bytes, by_type)
 
