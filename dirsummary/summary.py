@@ -1,5 +1,6 @@
 # pure, side-effect-free logic for dirsummary
 
+import json
 import os
 from dataclasses import dataclass
 
@@ -121,4 +122,19 @@ def human_lines(summary, path_label):
 def human_table(summary, path_label):
     """Return `human_lines` joined for printing."""
     return "\n".join(human_lines(summary, path_label))
+
+
+def render_json(summary, path_label):
+    """Return a compact JSON string: path, totals, and sorted per-type stats."""
+    by_type = [
+        {"type": stat.type, "count": stat.count, "total_bytes": stat.total_bytes}
+        for stat in summary.by_type
+    ]
+    payload = {
+        "path": path_label,
+        "total_files": summary.total_files,
+        "total_bytes": summary.total_bytes,
+        "by_type": by_type,
+    }
+    return json.dumps(payload)
 

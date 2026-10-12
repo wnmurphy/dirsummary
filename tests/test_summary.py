@@ -1,4 +1,5 @@
 import os
+import json
 from collections import defaultdict
 
 from dirsummary.summary import (
@@ -7,6 +8,7 @@ from dirsummary.summary import (
     format_size,
     human_lines,
     human_table,
+    render_json,
     summarize,
 )
 
@@ -128,4 +130,22 @@ def test_human_lines_empty_total_only():
 def test_human_table_is_join_of_lines():
     s = summarize([(".txt", 10)])
     assert human_table(s, "/x") == "\n".join(human_lines(s, "/x"))
+
+
+def test_render_json_structure_and_raw_bytes():
+    s = summarize([(".py", 100), (".txt", 300)])
+    doc = json.loads(render_json(s, "/home/x"))
+    assert doc["path"] == "/home/x"
+    assert doc["total_files"] == 2
+    assert doc["total_bytes"] == 400
+    assert doc["by_type"] == [
+        {"type": ".txt", "count": 1, "total_bytes": 300},
+        {"type": ".py", "count": 1, "total_bytes": 100},
+    ]
+    assert all(isinstance(t["total_bytes"], int) for t in doc["by_type"])
+
+
+def test_render_json_empty():
+    doc = json.loads(render_json(summarize([]), "/x"))
+    assert doc == {"path": "/x", "total_files": 0, "total_bytes": 0, "by_type": []}
 
